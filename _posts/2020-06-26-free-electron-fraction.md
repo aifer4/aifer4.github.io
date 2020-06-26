@@ -13,5 +13,5 @@ The free-electron fraction decreases during recombination ($$z \approx 1000$$), 
 
 ![](/assets/ionization-history.png)
 
-{% for tag in site.tags %} [#{{tag[0]}}]()
-{% endfor %}
+<!-- {% for tag in site.tags %} #{{tag[0]}}
+{% endfor %} -->

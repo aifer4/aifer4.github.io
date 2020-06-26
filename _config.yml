@@ -33,8 +33,28 @@ github_username: aifer4
 theme: minima
 plugins:
   - jekyll-feed
+  - jekyll-scholar
+
+# jekyll-scholar settings
+scholar:
+  style: ieee
+  locale: en
+
+  sort_by: none
+  order: ascending
+
+  source: ./_bibliography
+  bibliography: references.bib
+
+  details_dir: bibliography
+  details_layout: bibtex.html
+  details_link: Details
+
+  query: "@*"
 
 markdown: kramdown
+
+gems: ["jekyll/scholar"]
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to
@@ -54,3 +74,4 @@ markdown: kramdown
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+

@@ -18,6 +18,12 @@
     </nav>
     <section>
       {{ content }}
+    </br>
+        {% for tag in page.tags %}
+            #{{tag}}
+        {% endfor %}
+
+        {% bibliography --cited %}
     </section>
     <footer>
       &copy; to me

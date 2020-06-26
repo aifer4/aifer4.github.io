@@ -1,6 +1,7 @@
 ---
 layout: default
 title: "Optical Depth"
+tags: cosmology recombination
 ---
 
 # Optical Depth
@@ -21,4 +22,4 @@ In cosmology, the surface of last scattering is determined by the optical depth,
 
 Assuming the density of baryons is known, we can find the optical depth by solving for the [free electron fraction]({% post_url ./2020-06-26-free-electron-fraction %}).
 
-#cosmology #recombination
+![](/assets/optical-depth-history.png)
