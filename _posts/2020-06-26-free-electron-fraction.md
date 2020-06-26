@@ -2,6 +2,7 @@
 layout: "default"
 title: "Free Electron Fraction"
 tags: cosmology recombination pca
+categories: cosmology recombination
 ---
 
 # Free Electron Fraction
@@ -11,7 +12,7 @@ $$X_e = \frac{n_e}{n_e + n_H}$$, where $$n_e$$ and $$n_H$$ are the number densit
 
 The free-electron fraction decreases during recombination ($$z \approx 1000$$), and increases again at reionization ($$z \approx 10$$).
 
-![](/assets/ionization-history.png)
+![](/assets/ionization-history.png) (source: {% cite chlubaIntroductionRecombinationPhysics%})
 
 <!-- {% for tag in site.tags %} #{{tag[0]}}
 {% endfor %} -->

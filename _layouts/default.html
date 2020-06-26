@@ -17,13 +17,15 @@
       <a href="/blog/">Blog</a>
     </nav>
     <section>
+      <!-- show content -->
       {{ content }}
-    </br>
-        {% for tag in page.tags %}
-            #{{tag}}
-        {% endfor %}
-
-        {% bibliography --cited %}
+      <!-- show tags -->
+      <div class="post-tags">
+        {% if post %} {% assign tags = post.tags %} {% else %} {% assign tags =
+        page.tags %} {% endif %} {% for tag in tags %}
+        <a href="{{site.baseurl}}/tags/#{{tag|slugize}}">{{tag}}</a>
+        {% unless forloop.last %}&nbsp;{% endunless %} {% endfor %}
+      </div>
     </section>
     <footer>
       &copy; to me
