@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Manual Turing Machine</title>
+    <link rel="stylesheet" href="css/turing.css" />
+  </head>
+
+  <body>
+    <table>
+      <tr id="tape">
+        <td class="square">1</td>
+        <td class="head-square">2</td>
+        <td class="square">3</td>
+      </tr>
+    </table>
+
+    <button onClick="moveLeft();">←</button>
+    <button onClick="moveRight();">→</button>
+    <button onClick="writeZero();">write "0"</button>
+    <button onClick="writeOne();">write "1"</button>
+    <button onClick="erase();">erase</button>
+
+    <script src="turing.js"></script>
+  </body>
+</html>

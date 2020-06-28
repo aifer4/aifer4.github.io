@@ -6,13 +6,15 @@ tags: cosmology recombination
 
 # Optical Depth
 
-The optical depth $$\tau$$ is used to describe attenuation of light traveling through an absorptive medium.
+The optical depth $$ \tau $$ is used to describe attenuation of light traveling through an absorptive medium.
 
-The observed intensity $$I$$ depends on the optical depth and the actual intensity $$I_0$$ as follows:
+The observed intensity $$ I $$ depends on the optical depth and the actual intensity $$ I_0 $$ as follows:
 
-$$I(x)=I_0e^{-\tau(x)}$$
+$$
+I(x)=I_0e^{-\tau(x)}
+$$
 
-A "visibility function" $$g(x)$$ can then be defined as the derivative of the attenuation factor.
+A "visibility function" $$ g(x) $$ can then be defined as the derivative of the attenuation factor.
 
 $$
 g(x) = -\frac{d\tau}{dx}e^{-\tau(x)}
