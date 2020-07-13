@@ -1,48 +1,53 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8" />
     <style>
-      path {
-        fill: rgb(53, 49, 49);
-        stroke: rgb(85, 78, 78);
-        stroke-width: 0.2px;
-      }
-      path:hover {
-        stroke: rgb(185, 18, 18);
-        stroke-width: 1px;
-      }
-      #tooltip {
-        position: absolute;
-        left: 75px;
-        text-align: center;
-        height: 30px;
-        padding: 10px;
-        font-size: 14px;
-        background: #948f8f;
-        opacity: 80%;
-        border: 1px solid #989898;
-        pointer-events: none;
-      }
-      #panel {
-        position: relative;
-        height: 30px;
-        padding: 10px;
-        font-size: 14px;
-        background: #2c2929;
-        opacity: 80%;
-        border: 1px solid #989898;
-        font-family: sans-serif;
-        color: rgb(171, 242, 245);
-        z-index: 3;
-      }
+        path {
+            fill: rgb(53, 49, 49);
+            stroke: rgb(85, 78, 78);
+            stroke-width: 0.2px;
+        }
+
+        path:hover {
+            stroke: rgb(185, 18, 18);
+            stroke-width: 1px;
+        }
+
+        #tooltip {
+            position: absolute;
+            left: 75px;
+            text-align: center;
+            height: 30px;
+            padding: 10px;
+            font-size: 14px;
+            background: #948f8f;
+            opacity: 80%;
+            border: 1px solid #989898;
+            pointer-events: none;
+        }
+
+        #panel {
+            position: relative;
+            height: 30px;
+            padding: 10px;
+            font-size: 14px;
+            background: #2c2929;
+            opacity: 80%;
+            border: 1px solid #989898;
+            font-family: sans-serif;
+            color: rgb(171, 242, 245);
+            z-index: 3;
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="panel">
-      Google Sheets URL:
-      <input type="text" id="urlBox" value="" />
-      <button id="loadButton" onclick="loadData()">Load Data</button>
+        Google Sheets URL:
+        <input type="text" id="urlBox" value="" />
+        <button id="loadButton" onclick="loadData()">Load Data</button>
     </div>
     <!-- load svg zoom -->
     <script src="https://unpkg.com/panzoom@9.2.4/dist/panzoom.min.js"></script>
@@ -52,156 +57,158 @@
     <script src="https://d3js.org/d3-queue.v3.min.js"></script>
     <!-- main script -->
     <script>
-      // create svg element and path object
-      var width = 960,
-        height = 500;
+        // create svg element and path object
+        var width = 960,
+            height = 500;
 
-      var path = d3.geo.path();
+        var path = d3.geo.path();
 
-      var svg = d3
-        .select("body")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("id", "map-svg");
+        var svg = d3
+            .select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("id", "map-svg");
 
-      // make the svg zoomable
-      //panzoom(svg);
-      panzoom(document.querySelector("#map-svg"));
+        // make the svg zoomable
+        //panzoom(svg);
+        panzoom(document.querySelector("#map-svg"));
 
-      // Bring controlPanel to front
-      //p = document.getElementById("panel");
-      //p.parentNode.appendChild(p);
+        // Bring controlPanel to front
+        //p = document.getElementById("panel");
+        //p.parentNode.appendChild(p);
 
-      // add tooltip
-      var tooltipDiv = d3.select("body").append("div").attr("id", "tooltip");
+        // add tooltip
+        var tooltipDiv = d3.select("body").append("div").attr("id", "tooltip");
 
-      //d3.select("#panel").raise();
-      var colors = ["#f6eff7", "#bdc9e1", "#67a9cf", "#02818a"];
+        //d3.select("#panel").raise();
+        var colors = ["#f6eff7", "#bdc9e1", "#67a9cf", "#02818a"];
 
-      var dataUrl =
-        "https://spreadsheets.google.com/feeds/cells/1GDWP8i9eOXBvXyAFQkke7097-gBmbR9GIa71DPqdJQU/1/public/values?alt=json-in-script";
-      var geoJsonUrl =
-        "https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json";
-      var fipsJsonUrl =
-        "https://gist.githubusercontent.com/wavded/1250983/raw/bf7c1c08f7b1596ca10822baeb8049d7350b0a4b/fipsToState.json";
-      // set up queue
-      d3.queue()
-        .defer(d3.json, geoJsonUrl)
-        .defer(d3.xhr, dataUrl)
-        .defer(d3.json, fipsJsonUrl)
-        .awaitAll(ready);
-
-      function ready(error, results) {
-        if (error) throw error;
-
-        // process the spreadsheet json
-        dataString = results[1].response;
-        stripped = dataString.substring(28, dataString.length - 2);
-        dataJson = JSON.parse(stripped).feed.entry;
-
-        // put spreadsheet data into array
-        var data = [];
-        for (i = 0; i < dataJson.length; i++) {
-          var cell = dataJson[i]["gs$cell"];
-          var row = cell.row;
-          var col = cell.col;
-          if (!data.hasOwnProperty(col)) {
-            data[col] = [];
-          }
-          data[col][row] = cell["$t"];
-        }
-
-        // get color bins
-        var numVals = data[2].map((v) => parseInt(v));
-        var dataMin = Math.min(...data[2].filter((x) => !isNaN(x)));
-        var dataMax = Math.max(...data[2].filter((x) => !isNaN(x)));
-
-        var binSize = (dataMax - dataMin) / 4;
-        var bins = [
-          dataMin + binSize,
-          dataMin + binSize * 2,
-          dataMin + binSize * 3,
-          dataMin + binSize * 4,
-        ];
-
-        // process geojson
-        var topology = results[0];
-        var geojson = topojson.feature(topology, topology.objects.counties);
-
-        // associate fips ids with data values
-        var varName = data[2][1];
-        var ids = [];
-        var valueById = [];
-        for (i in geojson.features) {
-          ids.push(geojson.features[i].id);
-        }
-        ids = ids.sort((a, b) => a - b);
-        for (var i = 0; i < ids.length; i++) {
-          valueById[ids[i]] = data[2][i + 2];
-        }
-
-        //get fips data
-        var fips = results[2];
-
-        // draw counties
-        svg
-          .selectAll("path")
-          .data(geojson.features)
-          .enter()
-          .append("path")
-          .attr("d", path)
-          // draw tooltip
-          .on("mouseover", function (d) {
-            var sel = d3.select(this);
-            var stateName = fips[d.id.substring(0, 2)];
-            var countyName = d.properties.name;
-            var dataVal = valueById[d.id];
-            tooltipDiv
-              .html(
-                countyName +
-                  " County, " +
-                  stateName +
-                  "<br>" +
-                  varName +
-                  ": " +
-                  dataVal
-              )
-              .style("left", d3.event.pageX - 70 + "px")
-              .style("top", d3.event.pageY + 10 + "px");
-          });
-        svg.selectAll("path").style("fill", function (d) {
-          //console.log(d.id > 5000);
-          var x = valueById[d.id];
-          if (x < bins[0]) {
-            return colors[0];
-          } else if (x < bins[1]) {
-            return colors[1];
-          } else if (x < bins[2]) {
-            return colors[2];
-          } else if (x <= bins[3]) {
-            return colors[3];
-          }
-        });
-      }
-
-      //function to re-load data when url is input
-      function loadData() {
-        inputBox = document.getElementById("urlBox");
-        inputUrl = inputBox.value;
-        id = inputUrl.match("/spreadsheets/d/([a-zA-Z0-9-_]+)")[1];
-        dataUrl =
-          "https://spreadsheets.google.com/feeds/cells/" +
-          id +
-          "/1/public/values?alt=json-in-script";
-        console.log(dataUrl);
-        // redo queue
+        var dataUrl =
+            "https://spreadsheets.google.com/feeds/cells/1GDWP8i9eOXBvXyAFQkke7097-gBmbR9GIa71DPqdJQU/1/public/values?alt=json-in-script";
+        var geoJsonUrl =
+            "https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json";
+        var fipsJsonUrl2 =
+            "https://gist.githubusercontent.com/wavded/1250983/raw/bf7c1c08f7b1596ca10822baeb8049d7350b0a4b/fipsToState.json";
+        var fipsJsonUrl = "https://aifer4.github.io/fipsToState.JSON"
+        // set up queue
         d3.queue()
-          .defer(d3.json, geoJsonUrl)
-          .defer(d3.xhr, dataUrl)
-          .defer(d3.json, fipsJsonUrl)
-          .awaitAll(ready);
-      }
+            .defer(d3.json, geoJsonUrl)
+            .defer(d3.xhr, dataUrl)
+            .defer(d3.json, fipsJsonUrl)
+            .awaitAll(ready);
+
+        function ready(error, results) {
+            if (error) throw error;
+
+            // process the spreadsheet json
+            dataString = results[1].response;
+            stripped = dataString.substring(28, dataString.length - 2);
+            dataJson = JSON.parse(stripped).feed.entry;
+
+            // put spreadsheet data into array
+            var data = [];
+            for (i = 0; i < dataJson.length; i++) {
+                var cell = dataJson[i]["gs$cell"];
+                var row = cell.row;
+                var col = cell.col;
+                if (!data.hasOwnProperty(col)) {
+                    data[col] = [];
+                }
+                data[col][row] = cell["$t"];
+            }
+
+            // get color bins
+            var numVals = data[2].map((v) => parseInt(v));
+            var dataMin = Math.min(...data[2].filter((x) => !isNaN(x)));
+            var dataMax = Math.max(...data[2].filter((x) => !isNaN(x)));
+
+            var binSize = (dataMax - dataMin) / 4;
+            var bins = [
+                dataMin + binSize,
+                dataMin + binSize * 2,
+                dataMin + binSize * 3,
+                dataMin + binSize * 4,
+            ];
+
+            // process geojson
+            var topology = results[0];
+            var geojson = topojson.feature(topology, topology.objects.counties);
+
+            // associate fips ids with data values
+            var varName = data[2][1];
+            var ids = [];
+            var valueById = [];
+            for (i in geojson.features) {
+                ids.push(geojson.features[i].id);
+            }
+            ids = ids.sort((a, b) => a - b);
+            for (var i = 0; i < ids.length; i++) {
+                valueById[ids[i]] = data[2][i + 2];
+            }
+
+            //get fips data
+            var fips = results[2];
+
+            // draw counties
+            svg
+                .selectAll("path")
+                .data(geojson.features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                // draw tooltip
+                .on("mouseover", function (d) {
+                    var sel = d3.select(this);
+                    var stateName = fips[d.id.substring(0, 2)];
+                    var countyName = d.properties.name;
+                    var dataVal = valueById[d.id];
+                    tooltipDiv
+                        .html(
+                            countyName +
+                            " County, " +
+                            stateName +
+                            "<br>" +
+                            varName +
+                            ": " +
+                            dataVal
+                        )
+                        .style("left", d3.event.pageX - 70 + "px")
+                        .style("top", d3.event.pageY + 10 + "px");
+                });
+            svg.selectAll("path").style("fill", function (d) {
+                //console.log(d.id > 5000);
+                var x = valueById[d.id];
+                if (x < bins[0]) {
+                    return colors[0];
+                } else if (x < bins[1]) {
+                    return colors[1];
+                } else if (x < bins[2]) {
+                    return colors[2];
+                } else if (x <= bins[3]) {
+                    return colors[3];
+                }
+            });
+        }
+
+        //function to re-load data when url is input
+        function loadData() {
+            inputBox = document.getElementById("urlBox");
+            inputUrl = inputBox.value;
+            id = inputUrl.match("/spreadsheets/d/([a-zA-Z0-9-_]+)")[1];
+            dataUrl =
+                "https://spreadsheets.google.com/feeds/cells/" +
+                id +
+                "/1/public/values?alt=json-in-script";
+            console.log(dataUrl);
+            // redo queue
+            d3.queue()
+                .defer(d3.json, geoJsonUrl)
+                .defer(d3.xhr, dataUrl)
+                .defer(d3.json, fipsJsonUrl)
+                .awaitAll(ready);
+        }
     </script>
-  </body>
+</body>
+
 </html>
